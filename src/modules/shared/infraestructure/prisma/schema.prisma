@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Stock {
+  id           String   @id
+  ticker       String
+  company_name String
+  brokerage    String
+  action       String
+  rating_from  String
+  rating_to    String
+  target_from  Float
+  target_to    Float
+  time         DateTime
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  stock_analysis StockAnalysis[]
+
+  @@index([ticker])
+  @@index([brokerage])
+  @@index([ticker, brokerage])
+}
+
+model StockAnalysis {
+  id               String   @id
+  stock_id         String
+  current_price    Float
+  potential_growth Float
+  score            Float
+  reason           String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  stock Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+
+  @@index([score])
+  @@index([stock_id])
+  @@index([score, created_at])
+}
