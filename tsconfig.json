@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // Environment setup & latest features
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleDetection": "force",
+    "allowJs": true,
+    "sourceMap": true,
+    "types": ["node", "jest"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // Bundler mode
+    "moduleResolution": "node16",
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "incremental": true,
+
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "include": ["./**/*.ts", "./globals.d.ts"],
+
+  "exclude": ["node_modules"]
+}
