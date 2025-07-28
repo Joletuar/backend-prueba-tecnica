@@ -39,9 +39,6 @@ export class CockroachdbStockAnalystRepository
   async getBestRecommendation(): Promise<StockAnalyst | null> {
     try {
       const recommendation = await this.prismaClient.stockAnalysis.findFirst({
-        include: {
-          stock: true,
-        },
         orderBy: [{ score: 'desc' }, { created_at: 'desc' }],
       });
 
