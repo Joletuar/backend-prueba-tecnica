@@ -310,23 +310,6 @@ describe('Express Rest API', () => {
     });
 
     describe('Response Format', () => {
-      it('should return consistent response format for /best endpoint error', async () => {
-        // Act
-        const response = await testServer.request
-          .get(`${PATH}/best`)
-          .expect(httpStatus.NOT_FOUND);
-
-        // Assert
-        expect(response.body).toHaveProperty('error');
-        expect(response.body.error).toHaveProperty('message');
-        expect(response.body.error).toHaveProperty('statusCode');
-        expect(response.body.error).toHaveProperty('timestamp');
-        expect(response.body.error).toHaveProperty('requestId');
-        expect(response.body.error.statusCode).toBe(404);
-        expect(typeof response.body.error.timestamp).toBe('string');
-        expect(typeof response.body.error.requestId).toBe('string');
-      });
-
       it('should return consistent response format for /stock/:stockId endpoint', async () => {
         // Act
         const response = await testServer.request

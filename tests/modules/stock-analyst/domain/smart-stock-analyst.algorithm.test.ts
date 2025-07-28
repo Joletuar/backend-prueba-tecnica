@@ -205,11 +205,11 @@ describe('SmartStockAnalystAlgorithm', () => {
 
       // Assert
       expect(reason).toContain('Goldman Sachs');
-      expect(reason).toContain('mejoró');
+      expect(reason).toContain('ha mejorado su rating');
       expect(reason).toContain('Hold');
       expect(reason).toContain('Buy');
       expect(reason).toContain('potencial de crecimiento');
-      expect(reason).toContain('Recomendado porque');
+      expect(reason).toContain('recomendado');
     });
 
     it('should generate reason for rating downgrade', () => {
@@ -234,7 +234,7 @@ describe('SmartStockAnalystAlgorithm', () => {
 
       // Assert
       expect(reason).toContain('Morgan Stanley');
-      expect(reason).toContain('redujo');
+      expect(reason).toContain('ha reducido su rating');
       expect(reason).toContain('Buy');
       expect(reason).toContain('Hold');
     });
@@ -261,7 +261,7 @@ describe('SmartStockAnalystAlgorithm', () => {
 
       // Assert
       expect(reason).toContain('JP Morgan');
-      expect(reason).toContain('mantiene rating Buy');
+      expect(reason).toContain('mantiene su rating Buy');
     });
 
     it('should generate reason without price data', () => {
@@ -280,7 +280,7 @@ describe('SmartStockAnalystAlgorithm', () => {
 
       // Assert
       expect(reason).toContain('Goldman Sachs');
-      expect(reason).toContain('precio objetivo aumentó');
+      expect(reason).toContain('El precio objetivo ha aumentado');
       expect(reason).toContain('$150');
       expect(reason).toContain('$200');
     });
@@ -304,7 +304,7 @@ describe('SmartStockAnalystAlgorithm', () => {
       const reason = algorithm.generateReason(stock, priceData);
 
       // Assert
-      expect(reason).toContain('análisis muy reciente');
+      expect(reason).toContain('Este análisis es muy reciente');
     });
 
     it('should include action description', () => {
@@ -326,7 +326,7 @@ describe('SmartStockAnalystAlgorithm', () => {
       const reason = algorithm.generateReason(stock, priceData);
 
       // Assert
-      expect(reason).toContain('cobertura iniciada');
+      expect(reason).toContain('El analista ha iniciado cobertura');
     });
   });
 
@@ -359,7 +359,7 @@ describe('SmartStockAnalystAlgorithm', () => {
       expect(analysis.currentPrice).toBe(160);
       expect(analysis.potentialGrowth).toBe(25); // (200-160)/160 * 100
       expect(analysis.score).toBeGreaterThan(0);
-      expect(analysis.reason).toContain('Recomendado porque');
+      expect(analysis.reason).toContain('recomendado');
     });
 
     it('should create analysis without price data', () => {
@@ -381,7 +381,7 @@ describe('SmartStockAnalystAlgorithm', () => {
       expect(analysis.currentPrice).toBe(0);
       expect(analysis.potentialGrowth).toBe(33.3); // (200-150)/150 * 100, rounded
       expect(analysis.score).toBeGreaterThan(0);
-      expect(analysis.reason).toContain('Recomendado porque');
+      expect(analysis.reason).toContain('recomendado');
     });
   });
 });

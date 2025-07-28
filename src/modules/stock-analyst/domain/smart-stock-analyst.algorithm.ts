@@ -83,68 +83,134 @@ export class SmartStockAnalystAlgorithm implements StockAnalystAlgorithm {
   }
 
   generateReason(stock: Stock, priceData: StockPriceData | null): string {
-    const reasons: string[] = [];
+    const score = this.calculateScore(stock, priceData);
+    const finalRatingScore = this.getRatingScore(stock.ratingTo);
 
-    // Rating change analysis
+    // Calculate growth potential
+    const currentPrice = priceData?.currentPrice || 0;
+    const potentialGrowth =
+      currentPrice > 0
+        ? ((stock.targetTo - currentPrice) / currentPrice) * 100
+        : ((stock.targetTo - stock.targetFrom) / stock.targetFrom) * 100;
+
+    // Detailed stock analysis
+    const analysisPoints: string[] = [];
+
+    // 1. Rating analysis
     if (stock.ratingFrom !== stock.ratingTo) {
       const isUpgrade =
         this.getRatingScore(stock.ratingTo) >
         this.getRatingScore(stock.ratingFrom);
+      const changeType = isUpgrade
+        ? 'ha mejorado su rating'
+        : 'ha reducido su rating';
+      const perspective = isUpgrade
+        ? ', lo que refleja una perspectiva optimista'
+        : ', indicando una visión más cautelosa';
+      analysisPoints.push(
+        `${stock.brokerage} ${changeType} de ${stock.ratingFrom} a ${stock.ratingTo}${perspective}`
+      );
 
-      const changeType = isUpgrade ? 'mejoró' : 'redujo';
+      if (finalRatingScore <= 2) {
+        analysisPoints.push(
+          `El rating final negativo (${stock.ratingTo}) sugiere precaución en la inversión`
+        );
+      } else if (finalRatingScore >= 4) {
+        analysisPoints.push(
+          `El rating final positivo (${stock.ratingTo}) es una señal favorable para los inversores`
+        );
+      }
+    } else {
+      analysisPoints.push(
+        `${stock.brokerage} mantiene su rating ${stock.ratingTo}, confirmando su confianza en la acción`
+      );
+    }
 
-      reasons.push(
-        `${stock.brokerage} ${changeType} el rating de ${stock.ratingFrom} a ${stock.ratingTo}`
+    // 2. Growth potential analysis
+    if (potentialGrowth > 10) {
+      analysisPoints.push(
+        `La acción presenta un alto potencial de crecimiento del ${potentialGrowth.toFixed(1)}%, lo que es muy atractivo`
+      );
+    } else if (potentialGrowth > 0) {
+      analysisPoints.push(
+        `Ofrece un potencial de crecimiento moderado del ${potentialGrowth.toFixed(1)}%`
+      );
+    } else if (potentialGrowth > -5) {
+      analysisPoints.push(
+        `Presenta un riesgo limitado con una posible pérdida del ${Math.abs(potentialGrowth).toFixed(1)}%`
       );
     } else {
-      reasons.push(`${stock.brokerage} mantiene rating ${stock.ratingTo}`);
+      analysisPoints.push(
+        `Conlleva un alto riesgo con una pérdida potencial del ${Math.abs(potentialGrowth).toFixed(1)}%`
+      );
     }
 
-    // Price target analysis
+    // 3. Price details
     if (priceData && priceData.currentPrice > 0) {
-      const potentialGrowth =
+      const gap =
         ((stock.targetTo - priceData.currentPrice) / priceData.currentPrice) *
         100;
-
-      if (potentialGrowth > 0) {
-        reasons.push(
-          `con potencial de crecimiento del ${potentialGrowth.toFixed(1)}% (precio actual $${priceData.currentPrice.toFixed(2)} vs objetivo $${stock.targetTo})`
-        );
-      } else {
-        reasons.push(
-          `precio actual $${priceData.currentPrice.toFixed(2)} vs objetivo $${stock.targetTo}`
-        );
-      }
+      const gapDescription =
+        gap > 20
+          ? 'una brecha significativa que sugiere oportunidad'
+          : gap > 0
+            ? 'potencial de apreciación'
+            : 'una valoración desafiante';
+      analysisPoints.push(
+        `Con un precio actual de $${priceData.currentPrice.toFixed(2)} y un objetivo de $${stock.targetTo}, ${gapDescription}`
+      );
     } else {
-      const targetIncrease =
+      const targetChange =
         ((stock.targetTo - stock.targetFrom) / stock.targetFrom) * 100;
-
-      if (targetIncrease > 0) {
-        reasons.push(
-          `precio objetivo aumentó ${targetIncrease.toFixed(1)}% de $${stock.targetFrom} a $${stock.targetTo}`
+      if (Math.abs(targetChange) > 0.1) {
+        const direction = targetChange > 0 ? 'ha aumentado' : 'se ha reducido';
+        const sentiment =
+          targetChange > 0
+            ? ', mostrando mayor optimismo'
+            : ', reflejando expectativas más conservadoras';
+        analysisPoints.push(
+          `El precio objetivo ${direction} un ${Math.abs(targetChange).toFixed(1)}% de $${stock.targetFrom} a $${stock.targetTo}${sentiment}`
         );
       }
     }
 
-    // Action context
+    // 4. Action analysis
     const actionText = this.getActionDescription(stock.action.toLowerCase());
     if (actionText) {
-      reasons.push(actionText);
+      analysisPoints.push(actionText);
     }
 
-    // Recency
+    // 5. Recency factor
     const daysSinceAnalysis = Math.floor(
       (Date.now() - stock.time.getTime()) / (1000 * 60 * 60 * 24)
     );
     if (daysSinceAnalysis === 0) {
-      reasons.push('análisis muy reciente');
+      analysisPoints.push('Este análisis es muy reciente, realizado hoy mismo');
     } else if (daysSinceAnalysis <= 7) {
-      reasons.push(
-        `análisis reciente (${daysSinceAnalysis} día${daysSinceAnalysis === 1 ? '' : 's'})`
+      analysisPoints.push(
+        `El análisis fue realizado hace ${daysSinceAnalysis} día${daysSinceAnalysis === 1 ? '' : 's'}, por lo que mantiene relevancia`
+      );
+    } else if (daysSinceAnalysis > 30) {
+      analysisPoints.push(
+        `El análisis tiene ${daysSinceAnalysis} días de antigüedad, por lo que podría estar desactualizado`
       );
     }
 
-    return `Recomendado porque ${reasons.join(', ')}.`;
+    // 6. Overall evaluation based on score
+    let recommendation: string;
+    if (score >= 50) {
+      recommendation = 'Altamente recomendado';
+    } else if (score >= 25) {
+      recommendation = 'Moderadamente recomendado';
+    } else if (score >= 10) {
+      recommendation = 'Recomendación débil';
+    } else if (score >= 0) {
+      recommendation = 'No recomendado';
+    } else {
+      recommendation = 'Fuertemente desaconsejado';
+    }
+
+    return `${recommendation} (Score: ${score}). ${analysisPoints.join('. ')}.`;
   }
 
   createAnalysis(stock: Stock, priceData: StockPriceData | null): StockAnalyst {
@@ -181,15 +247,15 @@ export class SmartStockAnalystAlgorithm implements StockAnalystAlgorithm {
   private getActionDescription(action: string): string {
     switch (action) {
       case 'upgrade':
-        return 'acción de mejora';
+        return 'Esta mejora en la calificación es una señal positiva';
       case 'downgrade':
-        return 'acción de rebaja';
+        return 'Esta rebaja en la calificación indica cautela por parte del analista';
       case 'initiate':
-        return 'cobertura iniciada';
+        return 'El analista ha iniciado cobertura, proporcionando una nueva perspectiva';
       case 'maintain':
-        return 'posición mantenida';
+        return 'El analista mantiene su posición, confirmando su análisis previo';
       case 'reiterate':
-        return 'posición reiterada';
+        return 'El analista reitera su posición, reforzando su confianza en la recomendación';
       default:
         return '';
     }
