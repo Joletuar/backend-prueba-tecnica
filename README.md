@@ -15,12 +15,19 @@ cp .env.example .env
 pnpm db:migrate
 pnpm db:generate
 
-# Poblar base de datos (opcional)
+# Popular la base de datos (opcional)
 pnpm db:populate
 
 # Ejecutar en desarrollo
 pnpm dev
 ```
+
+## Documentación de la API
+
+La API cuenta con documentación interactiva usando Swagger/OpenAPI 3.0:
+
+- **Swagger UI**: [http://localhost:3000/api-docs](http://localhost:3000/api-docs) - Interfaz visual para explorar y probar los endpoints
+- **OpenAPI JSON**: [http://localhost:3000/api-docs.json](http://localhost:3000/api-docs.json) - Especificación completa en formato JSON
 
 ## 📚 API Endpoints
 

@@ -4,7 +4,9 @@ import cors from 'cors';
 import express, { type Router } from 'express';
 import PromiseRouter from 'express-promise-router';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 
+import { swaggerSpec } from '../../config/swagger.config';
 import type { HttpServer } from '../http-server.interface';
 import { addRequestId } from './middlewares/add-request-id.middleware';
 import { httpErrorHandler } from './middlewares/http-error-handler.middleware';
@@ -63,6 +65,18 @@ export class ExpressRestApiServer implements HttpServer<http.Server> {
     this.express.use(express.json());
     this.express.use(express.urlencoded({ extended: true }));
     this.express.use(helmet());
+
+    this.express.use(
+      '/api-docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec)
+    );
+
+    this.express.get('/api-docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+
+      return res.send(swaggerSpec);
+    });
 
     const router = PromiseRouter();
     this.express.use('/api/v1', router);
